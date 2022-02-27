@@ -6,7 +6,7 @@ import dev.jmoicano.newsapp.sourceslist.data.SourcesListDataSource
 import dev.jmoicano.newsapp.sourceslist.data.models.SourceResponse
 import javax.inject.Inject
 
-class SourcesListRemoteDataSource @Inject constructor(
+class SourcesListRemoteDataSource (
     private val sourcesListAPI: SourcesListAPI,
     private val errorParser: ErrorParser
 ) :

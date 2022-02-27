@@ -5,7 +5,10 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import dev.jmoicano.newsapp.BuildConfig
+import dev.jmoicano.newsapp.data.ErrorParser
+import dev.jmoicano.newsapp.sourceslist.data.SourcesListDataSource
 import dev.jmoicano.newsapp.sourceslist.data.remote.SourcesListAPI
+import dev.jmoicano.newsapp.sourceslist.data.remote.SourcesListRemoteDataSource
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -39,6 +42,14 @@ class NetworkModule {
     @Provides
     fun providesSourcesListAPI(retrofit: Retrofit): SourcesListAPI {
         return retrofit.create(SourcesListAPI::class.java)
+    }
+
+    @Provides
+    fun providesSourcesListDataSource(
+        sourcesListAPI: SourcesListAPI,
+        errorParser: ErrorParser
+    ): SourcesListDataSource {
+        return SourcesListRemoteDataSource(sourcesListAPI, errorParser)
     }
 
 }
