@@ -1,88 +1,63 @@
-package dev.jmoicano.newsapp.sourceslist.view
+package dev.jmoicano.newsapp.sources.view
 
 import android.content.Intent
 import android.net.Uri
-import android.os.Bundle
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.activity.viewModels
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import dagger.hilt.android.AndroidEntryPoint
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavHostController
 import dev.jmoicano.newsapp.R
+import dev.jmoicano.newsapp.Screen
 import dev.jmoicano.newsapp.data.Result
-import dev.jmoicano.newsapp.sourceslist.data.models.SourceResponse
-import dev.jmoicano.newsapp.ui.theme.NewsAppTheme
-
-
-@ExperimentalMaterialApi
-@AndroidEntryPoint
-class SourcesListActivity : ComponentActivity() {
-
-    private val viewModel by viewModels<SourcesListViewModel>()
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContent {
-            NewsAppTheme {
-                // A surface container using the 'background' color from the theme
-                Scaffold(
-                    modifier = Modifier.fillMaxSize(),
-                    topBar = {
-                        TopAppBar {
-                            Text(text = stringResource(id = R.string.app_name))
-                        }
-                    }
-                ) {
-                    SourcesList(result = viewModel.sourcesList.value)
-                    {
-                        TODO("Add navigation")
-                    }
-                }
-            }
-        }
-    }
-
-    override fun onResume() {
-        super.onResume()
-        viewModel.fetchSourcesList()
-    }
-}
+import dev.jmoicano.newsapp.sources.data.models.SourceResponse
 
 @ExperimentalMaterialApi
 @Composable
 fun SourcesList(
-    result: Result<List<SourceResponse>>,
-    onSourceClicked: (source: SourceResponse) -> Unit
+    navController: NavHostController
 ) {
+    val sourcesViewModel = hiltViewModel<SourcesViewModel>()
+
+    val result = sourcesViewModel.sourcesList.value
     when (result) {
         is Result.Success -> {
             LazyColumn(content = {
                 result.response.forEach { response ->
                     item {
-                        SourceView(sourceResponse = response, onSourceClicked = onSourceClicked)
+                        SourceView(sourceResponse = response) {
+                            navController.navigate(Screen.Articles.createRoute(response.id))
+                        }
                     }
                 }
             })
         }
         is Result.Error -> {
-
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Text(text = stringResource(id = R.string.source_list_error_message))
+                TextButton(onClick = { sourcesViewModel.fetchSourcesList() }) {
+                    Text(text = stringResource(id = R.string.source_list_retry))
+                }
+            }
         }
         Result.Loading -> {
-
+            Box(modifier = Modifier.fillMaxSize()) {
+                CircularProgressIndicator(modifier = Modifier.align(alignment = Alignment.Center))
+            }
         }
         Result.None -> {
-
+            sourcesViewModel.fetchSourcesList()
         }
     }
 }

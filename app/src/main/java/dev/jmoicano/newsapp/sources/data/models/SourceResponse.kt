@@ -1,4 +1,4 @@
-package dev.jmoicano.newsapp.sourceslist.data.models
+package dev.jmoicano.newsapp.sources.data.models
 
 import com.google.gson.annotations.SerializedName
 

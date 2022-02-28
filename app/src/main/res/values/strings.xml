@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">NewsApp</string>
+    <string name="source_list_error_message">Some error occoured</string>
+    <string name="source_list_retry">Reload?</string>
 </resources>

@@ -1,27 +1,34 @@
 package dev.jmoicano.newsapp.dependencyinjection
 
+import com.google.gson.Gson
+import com.google.gson.GsonBuilder
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import dev.jmoicano.newsapp.BuildConfig
+import dev.jmoicano.newsapp.articles.data.ArticlesDataSource
+import dev.jmoicano.newsapp.articles.data.remote.ArticlesAPI
+import dev.jmoicano.newsapp.articles.data.remote.ArticlesRemoteDataSource
 import dev.jmoicano.newsapp.data.ErrorParser
-import dev.jmoicano.newsapp.sourceslist.data.SourcesListDataSource
-import dev.jmoicano.newsapp.sourceslist.data.remote.SourcesListAPI
-import dev.jmoicano.newsapp.sourceslist.data.remote.SourcesListRemoteDataSource
+import dev.jmoicano.newsapp.data.InstantDeserializer
+import dev.jmoicano.newsapp.sources.data.SourcesDataSource
+import dev.jmoicano.newsapp.sources.data.remote.SourcesAPI
+import dev.jmoicano.newsapp.sources.data.remote.SourcesRemoteDataSource
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import java.time.Instant
 
 @Module
 @InstallIn(SingletonComponent::class)
 class NetworkModule {
 
     @Provides
-    fun providesRetrofit(okHttpClient: OkHttpClient): Retrofit {
+    fun providesRetrofit(okHttpClient: OkHttpClient, gson: Gson): Retrofit {
         return Retrofit.Builder()
             .baseUrl(BuildConfig.NEWS_API_BASE_URL)
-            .addConverterFactory(GsonConverterFactory.create())
+            .addConverterFactory(GsonConverterFactory.create(gson))
             .client(okHttpClient)
             .build()
     }
@@ -40,16 +47,36 @@ class NetworkModule {
     }
 
     @Provides
-    fun providesSourcesListAPI(retrofit: Retrofit): SourcesListAPI {
-        return retrofit.create(SourcesListAPI::class.java)
+    fun providesGson(): Gson {
+        return GsonBuilder()
+            .registerTypeAdapter(Instant::class.java, InstantDeserializer())
+            .create()
     }
 
     @Provides
-    fun providesSourcesListDataSource(
-        sourcesListAPI: SourcesListAPI,
+    fun providesSourcesAPI(retrofit: Retrofit): SourcesAPI {
+        return retrofit.create(SourcesAPI::class.java)
+    }
+
+    @Provides
+    fun providesSourcesDataSource(
+        sourcesAPI: SourcesAPI,
         errorParser: ErrorParser
-    ): SourcesListDataSource {
-        return SourcesListRemoteDataSource(sourcesListAPI, errorParser)
+    ): SourcesDataSource {
+        return SourcesRemoteDataSource(sourcesAPI, errorParser)
+    }
+
+    @Provides
+    fun providesArticlesAPI(retrofit: Retrofit): ArticlesAPI {
+        return retrofit.create(ArticlesAPI::class.java)
+    }
+
+    @Provides
+    fun providesArticlesDataSource(
+        articlesAPI: ArticlesAPI,
+        errorParser: ErrorParser
+    ): ArticlesDataSource {
+        return ArticlesRemoteDataSource(articlesAPI, errorParser)
     }
 
 }

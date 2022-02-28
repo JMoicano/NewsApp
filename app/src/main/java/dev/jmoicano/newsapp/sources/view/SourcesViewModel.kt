@@ -1,20 +1,19 @@
-package dev.jmoicano.newsapp.sourceslist.view
+package dev.jmoicano.newsapp.sources.view
 
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.jmoicano.newsapp.data.Result
-import dev.jmoicano.newsapp.sourceslist.data.SourcesListRepository
-import dev.jmoicano.newsapp.sourceslist.data.models.SourceResponse
+import dev.jmoicano.newsapp.sources.data.SourcesRepository
+import dev.jmoicano.newsapp.sources.data.models.SourceResponse
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class SourcesListViewModel @Inject constructor(private val sourcesListRepository: SourcesListRepository) :
+class SourcesViewModel @Inject constructor(private val sourcesRepository: SourcesRepository) :
     ViewModel() {
 
     private val mutableSourcesList = mutableStateOf<Result<List<SourceResponse>>>(Result.None)
@@ -22,7 +21,7 @@ class SourcesListViewModel @Inject constructor(private val sourcesListRepository
 
     fun fetchSourcesList() {
         viewModelScope.launch {
-            sourcesListRepository.fetchSourcesList().collect {
+            sourcesRepository.fetchSourcesList().collect {
                 mutableSourcesList.value = it
             }
         }
