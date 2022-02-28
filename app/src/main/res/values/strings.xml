@@ -3,4 +3,5 @@
     <string name="source_list_error_message">Some error occoured</string>
     <string name="source_list_retry">Reload?</string>
     <string name="article_thumb">Article Thumbnail</string>
+    <string name="navigate_back">Back</string>
 </resources>
