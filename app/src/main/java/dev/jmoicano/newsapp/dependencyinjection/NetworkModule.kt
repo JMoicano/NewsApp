@@ -15,7 +15,9 @@ import dev.jmoicano.newsapp.data.InstantDeserializer
 import dev.jmoicano.newsapp.sources.data.SourcesDataSource
 import dev.jmoicano.newsapp.sources.data.remote.SourcesAPI
 import dev.jmoicano.newsapp.sources.data.remote.SourcesRemoteDataSource
+import okhttp3.Interceptor
 import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.time.Instant
@@ -35,7 +37,7 @@ class NetworkModule {
 
     @Provides
     fun providesOkHttpClient(): OkHttpClient {
-        return OkHttpClient.Builder()
+        val clientBuilder = OkHttpClient.Builder()
             .addInterceptor { chain ->
                 val request =
                     chain.request().newBuilder()
@@ -43,7 +45,14 @@ class NetworkModule {
                         .build()
                 return@addInterceptor chain.proceed(request)
             }
-            .build()
+
+        if (BuildConfig.DEBUG) {
+            clientBuilder.addInterceptor(
+                HttpLoggingInterceptor().apply { level = HttpLoggingInterceptor.Level.BODY }
+            )
+        }
+
+        return clientBuilder.build()
     }
 
     @Provides

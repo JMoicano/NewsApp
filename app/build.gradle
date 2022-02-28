@@ -68,6 +68,7 @@ dependencies {
     //Retrofit HTTP REST client
     implementation "com.squareup.retrofit2:retrofit:$retrofit_version"
     implementation "com.squareup.retrofit2:converter-gson:$retrofit_version"
+    implementation "com.squareup.okhttp3:logging-interceptor:4.2.1"
 
     //Coil for image loading
     implementation "io.coil-kt:coil-compose:$coil_version"
